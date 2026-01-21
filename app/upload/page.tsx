@@ -100,6 +100,19 @@ export default function UploadPage() {
       return;
     }
 
+    // 4) Call analyze-deck Edge Function
+    const { error: fnError } = await supabase.functions.invoke("analyze-deck", {
+      body: {
+        deal_id: dealId,
+        storage_bucket: "deal-decks",
+        storage_path: `deals/${dealId}/deck.pdf`,
+      },
+    });
+
+    if (fnError) {
+      console.error("analyze-deck failed", fnError);
+    }
+
     router.push(`/deals/${dealId}`);
   };
 

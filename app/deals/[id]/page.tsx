@@ -1,10 +1,6 @@
 import DealDetailClient from "./DealDetailClient";
 
-export const dynamic = "force-static";
-
-export async function generateStaticParams() {
-  return [];
-}
+export const dynamic = "force-dynamic";
 
 export default function DealDetailPage() {
   return <DealDetailClient />;

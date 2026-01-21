@@ -32,6 +32,7 @@ export default function DealDetailClient() {
   const [documents, setDocuments] = useState<DealDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const fetchDeal = useCallback(async () => {
     if (!dealId) return;
@@ -90,6 +91,50 @@ export default function DealDetailClient() {
     fetchDeal();
   }, [fetchDeal]);
 
+  const handleRefresh = async () => {
+    if (!dealId) return;
+
+    setIsAnalyzing(true);
+    setErrorMessage(null);
+
+    try {
+      // 1) Get the latest document for this deal
+      const supabase = supabaseClient();
+      const { data: latestDoc, error: docError } = await supabase
+        .from("deal_documents")
+        .select("*")
+        .eq("deal_id", dealId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (docError || !latestDoc) {
+        console.warn("No document found for analysis", docError);
+      } else {
+        // 2) Call analyze-deck Edge Function
+        const { error: fnError } = await supabase.functions.invoke("analyze-deck", {
+          body: {
+            deal_id: dealId,
+            storage_bucket: latestDoc.storage_bucket ?? "deal-decks",
+            storage_path: latestDoc.storage_path,
+          },
+        });
+
+        if (fnError) {
+          console.error("analyze-deck failed", fnError);
+          setErrorMessage(`Analysis failed: ${fnError.message}`);
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error during refresh", err);
+      setErrorMessage("An unexpected error occurred during analysis.");
+    } finally {
+      setIsAnalyzing(false);
+      // 3) Always fetch the deal to refresh the UI (either with new AI data or just current DB state)
+      fetchDeal();
+    }
+  };
+
   const evidenceItems = (deal?.evidence_json ?? []) as EvidenceItem[];
   const summaryBullets = deal?.summary_5_bullets ?? [];
   const riskItems = deal?.risks_red_flags ?? [];
@@ -114,10 +159,11 @@ export default function DealDetailClient() {
           {deal ? <DecisionBadge decision={deal.go_no_go} /> : null}
           <button
             type="button"
-            onClick={fetchDeal}
-            className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+            onClick={handleRefresh}
+            disabled={isAnalyzing}
+            className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 disabled:opacity-50"
           >
-            Refresh
+            {isAnalyzing ? "Analyzing..." : "Refresh"}
           </button>
           <Link
             href="/deals"
