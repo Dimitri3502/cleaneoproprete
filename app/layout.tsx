@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
+import { TopNav } from "@/components/TopNav";
 import "./globals.css";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Dealflow OS",
+  description: "Finance-grade deal intake and review workspace.",
 };
 
 const geistSans = Geist({
@@ -25,16 +20,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+    <html lang="en">
+      <body className={`${geistSans.className} bg-slate-50 text-slate-900`}>
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.18),_transparent_55%)]">
+          <TopNav />
+          <main className="mx-auto w-full max-w-6xl px-6 py-10">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
