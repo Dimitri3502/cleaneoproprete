@@ -6,24 +6,14 @@ import { supabaseClient } from "@/lib/supabaseClient";
 import type { Deal, DealDecision, DealStatus } from "@/lib/types";
 import { DecisionBadge } from "@/components/Badge";
 import { formatDate } from "@/lib/format";
+import { getOptions, labelFromValue } from "@/lib/enums";
 
 type DealDecisionFilter = DealDecision | "all";
 type DealStatusFilter = DealStatus | "all";
 
-const decisionOptions: DealDecisionFilter[] = ["all", "GO", "NO_GO", "REVIEW"];
-const statusOptions: DealStatusFilter[] = [
-  "all",
-  "new",
-  "screening",
-  "ic_ready",
-  "diligence",
-  "passed",
-  "closed",
-];
-
 const formatEnum = (value?: string | null) =>
   value
-    ? value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    ? labelFromValue(value)
     : "—";
 
 const formatScore = (value?: number | string | null) => {
@@ -37,8 +27,22 @@ export default function DealsPage() {
   const [decisionFilter, setDecisionFilter] =
     useState<DealDecisionFilter>("all");
   const [statusFilter, setStatusFilter] = useState<DealStatusFilter>("all");
+  const [decisionOptions, setDecisionOptions] = useState<{ value: string; label: string }[]>([]);
+  const [statusOptions, setStatusOptions] = useState<{ value: string; label: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadOptions() {
+      const [dOptions, sOptions] = await Promise.all([
+        getOptions("deals.go_no_go"),
+        getOptions("deals.status"),
+      ]);
+      setDecisionOptions([{ value: "all", label: "All" }, ...dOptions]);
+      setStatusOptions([{ value: "all", label: "All" }, ...sOptions]);
+    }
+    loadOptions();
+  }, []);
 
   const fetchDeals = useCallback(async () => {
     setLoading(true);
@@ -103,8 +107,8 @@ export default function DealsPage() {
             className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
           >
             {decisionOptions.map((option) => (
-              <option key={option} value={option}>
-                {option === "all" ? "All" : option.replace("_", " ")}
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
@@ -121,8 +125,8 @@ export default function DealsPage() {
             className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
           >
             {statusOptions.map((option) => (
-              <option key={option} value={option}>
-                {option === "all" ? "All" : formatEnum(option)}
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>

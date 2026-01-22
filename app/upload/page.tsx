@@ -1,43 +1,35 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { supabaseClient } from "@/lib/supabaseClient";
 import type { DealSector, DealStage } from "@/lib/types";
-
-const sectorOptions: DealSector[] = [
-  "unknown",
-  "biotech",
-  "medtech",
-  "digital_health",
-  "services",
-  "other",
-];
-
-const stageOptions: DealStage[] = [
-  "unknown",
-  "pre_seed",
-  "seed",
-  "series_a",
-  "series_b",
-  "series_c",
-  "growth",
-  "public",
-];
-
-const formatEnum = (value: string) =>
-  value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+import { getOptions } from "@/lib/enums";
 
 export default function UploadPage() {
   const router = useRouter();
   const [companyName, setCompanyName] = useState("");
   const [sector, setSector] = useState<DealSector>("unknown");
   const [stage, setStage] = useState<DealStage>("unknown");
+  const [sectorOptions, setSectorOptions] = useState<{ value: string; label: string }[]>([]);
+  const [stageOptions, setStageOptions] = useState<{ value: string; label: string }[]>([]);
   const [sourceChannel, setSourceChannel] = useState("");
   const [leadEmail, setLeadEmail] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadOptions() {
+      const [sOptions, stOptions] = await Promise.all([
+        getOptions("deals.sector"),
+        getOptions("deals.stage"),
+      ]);
+      setSectorOptions(sOptions);
+      setStageOptions(stOptions);
+    }
+    loadOptions();
+  }, []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -173,11 +165,15 @@ export default function UploadPage() {
                 }
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
               >
-                {sectorOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {formatEnum(option)}
-                  </option>
-                ))}
+                {sectorOptions.length > 0 ? (
+                  sectorOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))
+                ) : (
+                  <option value="unknown">Loading...</option>
+                )}
               </select>
             </label>
             <label className="space-y-2 text-sm text-slate-700">
@@ -191,11 +187,15 @@ export default function UploadPage() {
                 }
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
               >
-                {stageOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {formatEnum(option)}
-                  </option>
-                ))}
+                {stageOptions.length > 0 ? (
+                  stageOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))
+                ) : (
+                  <option value="unknown">Loading...</option>
+                )}
               </select>
             </label>
           </div>

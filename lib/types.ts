@@ -1,30 +1,7 @@
-export type DealSector =
-  | "unknown"
-  | "biotech"
-  | "medtech"
-  | "digital_health"
-  | "services"
-  | "other";
-
-export type DealStage =
-  | "unknown"
-  | "pre_seed"
-  | "seed"
-  | "series_a"
-  | "series_b"
-  | "series_c"
-  | "growth"
-  | "public";
-
-export type DealDecision = "GO" | "NO_GO" | "REVIEW";
-
-export type DealStatus =
-  | "new"
-  | "screening"
-  | "ic_ready"
-  | "diligence"
-  | "passed"
-  | "closed";
+export type DealSector = string;
+export type DealStage = string;
+export type DealDecision = string;
+export type DealStatus = string;
 
 export type EvidenceItem = {
   field: string;
