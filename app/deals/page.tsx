@@ -1,20 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { supabaseClient } from "@/lib/supabaseClient";
-import type { Deal, DealDecision, DealStatus } from "@/lib/types";
-import { DecisionBadge } from "@/components/Badge";
-import { formatDate } from "@/lib/format";
-import { getOptions, labelFromValue } from "@/lib/enums";
+import {useState} from "react";
+import type {DealDecision, DealStatus} from "@/lib/types";
+import {DecisionBadge} from "@/components/Badge";
+import {formatDate} from "@/lib/format";
+import {labelFromValue} from "@/lib/enums";
+import {useDeals, useDecisionOptions, useStatusOptions,} from "@/services/deal/deal.hooks";
 
 type DealDecisionFilter = DealDecision | "all";
 type DealStatusFilter = DealStatus | "all";
 
 const formatEnum = (value?: string | null) =>
-  value
-    ? labelFromValue(value)
-    : "—";
+  value ? labelFromValue(value) : "—";
 
 const formatScore = (value?: number | string | null) => {
   if (value === null || value === undefined) return "—";
@@ -23,54 +21,21 @@ const formatScore = (value?: number | string | null) => {
 };
 
 export default function DealsPage() {
-  const [deals, setDeals] = useState<Deal[]>([]);
   const [decisionFilter, setDecisionFilter] =
     useState<DealDecisionFilter>("all");
   const [statusFilter, setStatusFilter] = useState<DealStatusFilter>("all");
-  const [decisionOptions, setDecisionOptions] = useState<{ value: string; label: string }[]>([]);
-  const [statusOptions, setStatusOptions] = useState<{ value: string; label: string }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadOptions() {
-      const [dOptions, sOptions] = await Promise.all([
-        getOptions("deals.go_no_go"),
-        getOptions("deals.status"),
-      ]);
-      setDecisionOptions([{ value: "all", label: "All" }, ...dOptions]);
-      setStatusOptions([{ value: "all", label: "All" }, ...sOptions]);
-    }
-    loadOptions();
-  }, []);
+  const { data: decisionOptions = [] } = useDecisionOptions();
 
-  const fetchDeals = useCallback(async () => {
-    setLoading(true);
-    setErrorMessage(null);
-    const supabase = supabaseClient();
-    let query = supabase
-      .from("deals")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const { data: statusOptions = [] } = useStatusOptions();
 
-    if (decisionFilter !== "all") {
-      query = query.eq("go_no_go", decisionFilter);
-    }
-    if (statusFilter !== "all") {
-      query = query.eq("status", statusFilter);
-    }
+  const {
+    data: deals = [],
+    isLoading: loading,
+    error: dealsError,
+  } = useDeals(decisionFilter, statusFilter);
 
-    const { data, error } = await query;
-    if (error) {
-      setErrorMessage(error.message);
-    }
-    setDeals(data ?? []);
-    setLoading(false);
-  }, [decisionFilter, statusFilter]);
-
-  useEffect(() => {
-    fetchDeals();
-  }, [fetchDeals]);
+  const errorMessage = dealsError instanceof Error ? dealsError.message : null;
 
   return (
     <div className="space-y-6">

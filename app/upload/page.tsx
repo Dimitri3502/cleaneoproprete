@@ -1,112 +1,61 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { useState, type FormEvent } from "react";
 import type { DealSector, DealStage } from "@/lib/types";
-import { getOptions } from "@/lib/enums";
+import {
+  useSectorOptions,
+  useStageOptions,
+  useCreateDealMutation,
+} from "@/services/deal/deal.hooks";
 
 export default function UploadPage() {
   const router = useRouter();
   const [companyName, setCompanyName] = useState("");
   const [sector, setSector] = useState<DealSector>("unknown");
   const [stage, setStage] = useState<DealStage>("unknown");
-  const [sectorOptions, setSectorOptions] = useState<{ value: string; label: string }[]>([]);
-  const [stageOptions, setStageOptions] = useState<{ value: string; label: string }[]>([]);
+
+  const { data: sectorOptions = [] } = useSectorOptions();
+  const { data: stageOptions = [] } = useStageOptions();
+  const createDealMutation = useCreateDealMutation();
+
   const [sourceChannel, setSourceChannel] = useState("");
   const [leadEmail, setLeadEmail] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadOptions() {
-      const [sOptions, stOptions] = await Promise.all([
-        getOptions("deals.sector"),
-        getOptions("deals.stage"),
-      ]);
-      setSectorOptions(sOptions);
-      setStageOptions(stOptions);
-    }
-    loadOptions();
-  }, []);
+  const [localErrorMessage, setLocalErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!file) {
-      setErrorMessage("Please select a PDF deck to upload.");
+      setLocalErrorMessage("Please select a PDF deck to upload.");
       return;
     }
 
-    setSubmitting(true);
-    setErrorMessage(null);
-    const supabase = supabaseClient();
+    setLocalErrorMessage(null);
 
-    const { data: dealData, error: dealError } = await supabase
-      .from("deals")
-      .insert({
-        company_name: companyName || null,
+    createDealMutation.mutate(
+      {
+        companyName,
         sector,
         stage,
-        source_channel: sourceChannel || null,
-        lead_contact_email: leadEmail || null,
-        one_liner: "",
-      })
-      .select("id")
-      .single();
-
-    if (dealError || !dealData?.id) {
-      setSubmitting(false);
-      setErrorMessage(dealError?.message ?? "Unable to create deal.");
-      return;
-    }
-
-    const dealId = dealData.id;
-    const storagePath = `deals/${dealId}/deck.pdf`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("deal-decks")
-      .upload(storagePath, file, {
-        upsert: true,
-        contentType: file.type,
-      });
-
-    if (uploadError) {
-      setSubmitting(false);
-      setErrorMessage(uploadError.message);
-      return;
-    }
-
-    const { error: documentError } = await supabase.from("deal_documents").insert({
-      deal_id: dealId,
-      file_name: file.name,
-      storage_bucket: "deal-decks",
-      storage_path: storagePath,
-      mime_type: file.type,
-      file_size_bytes: file.size,
-    });
-
-    if (documentError) {
-      setSubmitting(false);
-      setErrorMessage(documentError.message);
-      return;
-    }
-
-    // 4) Call analyze-deck Edge Function
-    const { error: fnError } = await supabase.functions.invoke("analyze-deck", {
-      body: {
-        deal_id: dealId,
-        storage_bucket: "deal-decks",
-        storage_path: `deals/${dealId}/deck.pdf`,
+        sourceChannel,
+        leadEmail,
+        file,
       },
-    });
-
-    if (fnError) {
-      console.error("analyze-deck failed", fnError);
-    }
-
-    router.push(`/deals/${dealId}`);
+      {
+        onSuccess: (data) => {
+          router.push(`/deals/${data.dealId}`);
+        },
+      },
+    );
   };
+
+  const submitting = createDealMutation.isPending;
+  const errorMessage =
+    localErrorMessage ||
+    (createDealMutation.error instanceof Error
+      ? createDealMutation.error.message
+      : null);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_0.8fr]">
@@ -172,7 +121,9 @@ export default function UploadPage() {
                     </option>
                   ))
                 ) : (
-                  <option value="unknown">Loading...</option>
+                  <option value="unknown" disabled>
+                    Loading...
+                  </option>
                 )}
               </select>
             </label>
@@ -194,7 +145,9 @@ export default function UploadPage() {
                     </option>
                   ))
                 ) : (
-                  <option value="unknown">Loading...</option>
+                  <option value="unknown" disabled>
+                    Loading...
+                  </option>
                 )}
               </select>
             </label>

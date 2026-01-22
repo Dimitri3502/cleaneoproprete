@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import {useParams} from "next/navigation";
 import Link from "next/link";
-import { supabaseClient } from "@/lib/supabaseClient";
-import type { Deal, DealDocument, EvidenceItem } from "@/lib/types";
-import { DecisionBadge } from "@/components/Badge";
-import { formatDate } from "@/lib/format";
+import type {EvidenceItem} from "@/lib/types";
+import {DecisionBadge} from "@/components/Badge";
+import {formatDate} from "@/lib/format";
+import {useAnalyzeDealMutation, useDeal, useDealDocuments,} from "@/services/deal/deal.hooks";
 
 const formatEnum = (value?: string | null) =>
   value
@@ -28,111 +27,34 @@ const formatFileSize = (bytes?: number | null) => {
 export default function DealDetailClient() {
   const params = useParams<{ id: string }>();
   const dealId = params?.id;
-  const [deal, setDeal] = useState<Deal | null>(null);
-  const [documents, setDocuments] = useState<DealDocument[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const fetchDeal = useCallback(async () => {
-    if (!dealId) return;
-    setLoading(true);
-    setErrorMessage(null);
-    const supabase = supabaseClient();
+  const {
+    data: deal,
+    isLoading: isDealLoading,
+    error: dealError,
+  } = useDeal(dealId);
 
-    const { data: dealData, error: dealError } = await supabase
-      .from("deals")
-      .select("*")
-      .eq("id", dealId)
-      .single();
+  const {
+    data: documents = [],
+    isLoading: isDocsLoading,
+    error: docsError,
+  } = useDealDocuments(dealId);
 
-    if (dealError) {
-      setErrorMessage(dealError.message);
-      setDeal(null);
-      setDocuments([]);
-      setLoading(false);
-      return;
-    }
+  const analyzeDealMutation = useAnalyzeDealMutation();
 
-    const { data: documentData, error: docError } = await supabase
-      .from("deal_documents")
-      .select("*")
-      .eq("deal_id", dealId)
-      .order("created_at", { ascending: false });
+  const loading = isDealLoading || isDocsLoading;
+  const isAnalyzing = analyzeDealMutation.isPending;
 
-    if (docError) {
-      setErrorMessage(docError.message);
-    }
-
-    const docsWithUrls = await Promise.all(
-      (documentData ?? []).map(async (doc) => {
-        const signed = await supabase.storage
-          .from(doc.storage_bucket ?? "deal-decks")
-          .createSignedUrl(doc.storage_path, 60 * 60);
-
-        if (signed.data?.signedUrl) {
-          return { ...doc, signedUrl: signed.data.signedUrl };
-        }
-
-        const publicUrl = supabase.storage
-          .from(doc.storage_bucket ?? "deal-decks")
-          .getPublicUrl(doc.storage_path);
-
-        return { ...doc, signedUrl: publicUrl.data.publicUrl };
-      }),
-    );
-
-    setDeal(dealData as Deal);
-    setDocuments(docsWithUrls as DealDocument[]);
-    setLoading(false);
-  }, [dealId]);
-
-  useEffect(() => {
-    fetchDeal();
-  }, [fetchDeal]);
+  const errorMessage =
+    (dealError instanceof Error ? dealError.message : null) ||
+    (docsError instanceof Error ? docsError.message : null) ||
+    (analyzeDealMutation.error instanceof Error
+      ? analyzeDealMutation.error.message
+      : null);
 
   const handleRefresh = async () => {
     if (!dealId) return;
-
-    setIsAnalyzing(true);
-    setErrorMessage(null);
-
-    try {
-      // 1) Get the latest document for this deal
-      const supabase = supabaseClient();
-      const { data: latestDoc, error: docError } = await supabase
-        .from("deal_documents")
-        .select("*")
-        .eq("deal_id", dealId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (docError || !latestDoc) {
-        console.warn("No document found for analysis", docError);
-      } else {
-        // 2) Call analyze-deck Edge Function
-        const { error: fnError } = await supabase.functions.invoke("analyze-deck", {
-          body: {
-            deal_id: dealId,
-            storage_bucket: latestDoc.storage_bucket ?? "deal-decks",
-            storage_path: latestDoc.storage_path,
-          },
-        });
-
-        if (fnError) {
-          console.error("analyze-deck failed", fnError);
-          setErrorMessage(`Analysis failed: ${fnError.message}`);
-        }
-      }
-    } catch (err) {
-      console.error("Unexpected error during refresh", err);
-      setErrorMessage("An unexpected error occurred during analysis.");
-    } finally {
-      setIsAnalyzing(false);
-      // 3) Always fetch the deal to refresh the UI (either with new AI data or just current DB state)
-      fetchDeal();
-    }
+    analyzeDealMutation.mutate(dealId);
   };
 
   const evidenceItems = (deal?.evidence_json ?? []) as EvidenceItem[];

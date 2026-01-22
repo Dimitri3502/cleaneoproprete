@@ -18,7 +18,6 @@ function json(data: unknown, status = 200) {
 
 
 Deno.serve(async (req) => {
-    console.log("OPENAI_API_KEY exists:", !!Deno.env.get("OPENAI_API_KEY"));
 
     try {
         if (req.method !== "POST") {
@@ -203,11 +202,11 @@ Return STRICT JSON following the schema.
             .update({
                 one_liner: result.one_liner,
                 summary_5_bullets: result.summary_5_bullets,
-                thesis_fit_subscore: result.thesis_fit_subscore,
-                stage_ticket_subscore: result.stage_ticket_subscore,
-                team_subscore: result.team_subscore,
-                data_signal_subscore: result.data_signal_subscore,
-                total_score: result.total_score,
+                thesis_fit_subscore: Math.round(result.thesis_fit_subscore),
+                stage_ticket_subscore: Math.round(result.stage_ticket_subscore),
+                team_subscore: Math.round(result.team_subscore),
+                data_signal_subscore: Math.round(result.data_signal_subscore),
+                total_score: Math.round(result.total_score),
                 go_no_go: result.go_no_go,
                 why_go_no_go_3_bullets: result.why_go_no_go_3_bullets,
                 overall_confidence: result.overall_confidence,
