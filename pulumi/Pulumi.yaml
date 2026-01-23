@@ -1,0 +1,12 @@
+name: captech-site
+description: Pulumi infrastructure for Captech site
+runtime:
+  name: nodejs
+  options:
+    packagemanager: npm
+config:
+  name: 'captech-site'
+  fqdns: '["captech.luphy.fr"]'
+  pulumi:tags:
+    value:
+      pulumi:template: typescript
