@@ -1,0 +1,8 @@
+{
+  "name": "supabase-back",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "supabase functions serve --no-verify-jwt"
+  }
+}
