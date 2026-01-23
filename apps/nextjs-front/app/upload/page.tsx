@@ -44,7 +44,7 @@ export default function UploadPage() {
       },
       {
         onSuccess: (data) => {
-          router.push(`/deals/${data.dealId}`);
+          router.push(`/deals?id=${data.dealId}`);
         },
       },
     );

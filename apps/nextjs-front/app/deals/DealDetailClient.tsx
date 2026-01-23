@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { EvidenceItem } from '@/lib/types';
 import { DecisionBadge } from '@/components/Badge';
 import { formatDate } from '@/lib/format';
@@ -22,6 +23,7 @@ const formatFileSize = (bytes?: number | null) => {
 };
 
 export default function DealDetailClient({ id }: { id?: string }) {
+  const router = useRouter();
   const dealId = id;
 
   const { data: deal, isLoading: isDealLoading, error: dealError } = useDeal(dealId);
@@ -44,7 +46,13 @@ export default function DealDetailClient({ id }: { id?: string }) {
 
   const handleRefresh = async () => {
     if (!dealId) return;
-    analyzeDealMutation.mutate(dealId);
+    analyzeDealMutation.mutate(dealId, {
+      onSuccess: () => {
+        // Redirection or refresh logic if needed, but usually query invalidation handles it
+        // If we want to force a "redirect" to the same page to clear some state or just ensure the URL is correct
+        router.push(`/deals?id=${dealId}`);
+      },
+    });
   };
 
   const evidenceItems = (deal?.evidence_json ?? []) as EvidenceItem[];

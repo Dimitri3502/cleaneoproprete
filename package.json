@@ -3,9 +3,9 @@
   "private": true,
   "scripts": {
     "dev": "turbo dev",
-    "build": "turbo build",
+    "build": "NODE_ENV=production turbo build",
     "lint": "turbo lint",
-    "deploy": "NODE_ENV=production pnpm build && pnpm --filter @captech-dealflow/pulumi deploy",
+    "deploy": "pnpm build && pnpm --filter @captech-dealflow/pulumi deploy",
     "format": "prettier --write .",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
