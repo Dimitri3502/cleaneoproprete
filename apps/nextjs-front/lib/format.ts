@@ -1,10 +1,10 @@
 export const formatDate = (value?: string | null) => {
-  if (!value) return "—";
+  if (!value) return '—';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 };

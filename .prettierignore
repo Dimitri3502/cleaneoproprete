@@ -1,0 +1,9 @@
+.next
+node_modules
+dist
+.turbo
+build
+coverage
+out
+pulumi/bin
+supabase/functions/.import_map.json

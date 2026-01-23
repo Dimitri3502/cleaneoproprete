@@ -1,18 +1,18 @@
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Cache-Control": "public, max-age=300",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Cache-Control': 'public, max-age=300',
 };
 
 // Configuration: which table columns to check for enums
 const CONFIG = [
-  { table: "deals", column: "sector" },
-  { table: "deals", column: "stage" },
-  { table: "deals", column: "go_no_go" },
-  { table: "deals", column: "status" },
+  { table: 'deals', column: 'sector' },
+  { table: 'deals', column: 'stage' },
+  { table: 'deals', column: 'go_no_go' },
+  { table: 'deals', column: 'status' },
 ];
 
 // Fallback map for non-enum constraints or static lists
@@ -22,25 +22,25 @@ const FALLBACKS: Record<string, string[]> = {
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
     const result: Record<string, string[]> = {};
 
     for (const item of CONFIG) {
       const key = `${item.table}.${item.column}`;
-      
+
       console.log(`Processing ${key}`);
 
       // Fetch enum values using our RPC
-      const { data: enumValues, error: rpcError } = await supabase.rpc("get_column_enum_values", {
+      const { data: enumValues, error: rpcError } = await supabase.rpc('get_column_enum_values', {
         p_table: item.table,
         p_column: item.column,
       });
@@ -57,12 +57,12 @@ Deno.serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ enums: result }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
   }

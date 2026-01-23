@@ -1,29 +1,40 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import {useState} from "react";
-import type {DealDecision, DealStatus} from "@/lib/types";
-import {DecisionBadge} from "@/components/Badge";
-import {formatDate} from "@/lib/format";
-import {labelFromValue} from "@/lib/enums";
-import {useDeals, useDecisionOptions, useStatusOptions,} from "@/services/deal/deal.hooks";
+import Link from 'next/link';
+import { Suspense, useState } from 'react';
+import type { DealDecision, DealStatus } from '@/lib/types';
+import { DecisionBadge } from '@/components/Badge';
+import { formatDate } from '@/lib/format';
+import { labelFromValue } from '@/lib/enums';
+import { useDeals, useDecisionOptions, useStatusOptions } from '@/services/deal/deal.hooks';
+import { useSearchParams } from 'next/navigation';
+import DealDetailClient from './DealDetailClient';
 
-type DealDecisionFilter = DealDecision | "all";
-type DealStatusFilter = DealStatus | "all";
+type DealDecisionFilter = DealDecision | 'all';
+type DealStatusFilter = DealStatus | 'all';
 
-const formatEnum = (value?: string | null) =>
-  value ? labelFromValue(value) : "—";
+const formatEnum = (value?: string | null) => (value ? labelFromValue(value) : '—');
 
 const formatScore = (value?: number | string | null) => {
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return '—';
   const numeric = Number(value);
-  return Number.isNaN(numeric) ? "—" : Math.round(numeric);
+  return Number.isNaN(numeric) ? '—' : Math.round(numeric);
 };
 
 export default function DealsPage() {
-  const [decisionFilter, setDecisionFilter] =
-    useState<DealDecisionFilter>("all");
-  const [statusFilter, setStatusFilter] = useState<DealStatusFilter>("all");
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DealsPageContent />
+    </Suspense>
+  );
+}
+
+function DealsPageContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
+
+  const [decisionFilter, setDecisionFilter] = useState<DealDecisionFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<DealStatusFilter>('all');
 
   const { data: decisionOptions = [] } = useDecisionOptions();
 
@@ -35,6 +46,10 @@ export default function DealsPage() {
     error: dealsError,
   } = useDeals(decisionFilter, statusFilter);
 
+  if (id) {
+    return <DealDetailClient id={id} />;
+  }
+
   const errorMessage = dealsError instanceof Error ? dealsError.message : null;
 
   return (
@@ -44,9 +59,7 @@ export default function DealsPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
             Dealflow
           </p>
-          <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-            Incoming deals
-          </h1>
+          <h1 className="mt-2 text-3xl font-semibold text-slate-900">Incoming deals</h1>
           <p className="mt-2 text-sm text-slate-600">
             Filter by decision posture and pipeline status.
           </p>
@@ -66,9 +79,7 @@ export default function DealsPage() {
           </label>
           <select
             value={decisionFilter}
-            onChange={(event) =>
-              setDecisionFilter(event.target.value as DealDecisionFilter)
-            }
+            onChange={(event) => setDecisionFilter(event.target.value as DealDecisionFilter)}
             className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
           >
             {decisionOptions.map((option) => (
@@ -84,9 +95,7 @@ export default function DealsPage() {
           </label>
           <select
             value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(event.target.value as DealStatusFilter)
-            }
+            onChange={(event) => setStatusFilter(event.target.value as DealStatusFilter)}
             className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
           >
             {statusOptions.map((option) => (
@@ -97,7 +106,7 @@ export default function DealsPage() {
           </select>
         </div>
         <div className="flex items-center text-xs text-slate-500">
-          {loading ? "Loading deals..." : `${deals.length} deals`}
+          {loading ? 'Loading deals...' : `${deals.length} deals`}
         </div>
       </div>
 
@@ -133,33 +142,23 @@ export default function DealsPage() {
                   <tr key={deal.id} className="hover:bg-slate-50/70">
                     <td className="px-4 py-4">
                       <Link
-                        href={`/deals/${deal.id}`}
+                        href={`/deals?id=${deal.id}`}
                         className="font-semibold text-slate-900 hover:underline"
                       >
-                        {deal.company_name || "Unnamed deal"}
+                        {deal.company_name || 'Unnamed deal'}
                       </Link>
-                      <p className="text-xs text-slate-500">
-                        {deal.deal_id || "No deal ID"}
-                      </p>
+                      <p className="text-xs text-slate-500">{deal.deal_id || 'No deal ID'}</p>
                     </td>
-                    <td className="px-4 py-4 text-slate-600">
-                      {formatEnum(deal.sector)}
-                    </td>
-                    <td className="px-4 py-4 text-slate-600">
-                      {formatEnum(deal.stage)}
-                    </td>
-                    <td className="px-4 py-4 text-slate-900">
-                      {formatScore(deal.total_score)}
-                    </td>
+                    <td className="px-4 py-4 text-slate-600">{formatEnum(deal.sector)}</td>
+                    <td className="px-4 py-4 text-slate-600">{formatEnum(deal.stage)}</td>
+                    <td className="px-4 py-4 text-slate-900">{formatScore(deal.total_score)}</td>
                     <td className="px-4 py-4">
                       <DecisionBadge decision={deal.go_no_go} />
                     </td>
                     <td className="px-4 py-4 text-slate-600">
                       {Math.round(Number(deal.overall_confidence ?? 0) * 100)}%
                     </td>
-                    <td className="px-4 py-4 text-slate-500">
-                      {formatDate(deal.created_at)}
-                    </td>
+                    <td className="px-4 py-4 text-slate-500">{formatDate(deal.created_at)}</td>
                   </tr>
                 ))
               )}

@@ -1,12 +1,11 @@
-import Link from "next/link";
-import Image from "next/image";
-import { AuthButton } from "./auth-button";
-import { ThemeSwitcher } from "./theme-switcher";
+import Link from 'next/link';
+import Image from 'next/image';
+import { AuthButton } from './auth-button';
+import { ThemeSwitcher } from './theme-switcher';
 
-const navLink =
-  "text-sm font-medium text-foreground/70 transition hover:text-foreground";
+const navLink = 'text-sm font-medium text-foreground/70 transition hover:text-foreground';
 
-export const TopNav = async () => {
+export const TopNav = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">

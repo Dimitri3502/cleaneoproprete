@@ -3,6 +3,7 @@
   "references": [
     { "path": "packages/shared" },
     { "path": "apps/nextjs-front" },
-    { "path": "pulumi" }
+    { "path": "pulumi" },
+    { "path": "supabase" }
   ]
 }

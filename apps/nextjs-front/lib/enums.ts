@@ -1,4 +1,4 @@
-import { supabaseClient } from "./supabaseClient";
+import { supabaseClient } from './supabaseClient';
 
 export type MetaEnums = {
   enums: {
@@ -6,7 +6,7 @@ export type MetaEnums = {
   };
 };
 
-export type EnumKey = "deals.sector" | "deals.stage" | "deals.go_no_go" | "deals.status";
+export type EnumKey = 'deals.sector' | 'deals.stage' | 'deals.go_no_go' | 'deals.status';
 
 let cachedEnums: MetaEnums | null = null;
 let lastFetch = 0;
@@ -19,10 +19,10 @@ export async function getMetaEnums(): Promise<MetaEnums> {
   }
 
   const supabase = supabaseClient();
-  const { data, error } = await supabase.functions.invoke<MetaEnums>("meta-enums");
+  const { data, error } = await supabase.functions.invoke<MetaEnums>('meta-enums');
 
   if (error || !data) {
-    console.error("Error fetching meta-enums:", error);
+    console.error('Error fetching meta-enums:', error);
     // Return empty or fallback if needed. For now, empty structure.
     return cachedEnums || { enums: {} };
   }
@@ -42,8 +42,6 @@ export async function getOptions(key: EnumKey): Promise<{ value: string; label: 
 }
 
 export function labelFromValue(value: string): string {
-  if (!value) return "";
-  return value
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  if (!value) return '';
+  return value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }

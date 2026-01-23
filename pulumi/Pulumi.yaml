@@ -1,5 +1,5 @@
-name: captech-site
-description: Pulumi infrastructure for Captech site
+name: captech-dealflow-infra
+description: Pulumi infrastructure for Captech Dealflow
 runtime:
   name: nodejs
   options:

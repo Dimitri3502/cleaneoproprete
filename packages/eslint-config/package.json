@@ -1,0 +1,23 @@
+{
+  "name": "@captech-dealflow/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    "./base": "./base.js",
+    "./next": "./next.js"
+  },
+  "files": [
+    "base.js",
+    "next.js"
+  ],
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "15.3.1",
+    "eslint-config-prettier": "^10.0.1",
+    "typescript-eslint": "^8.19.1"
+  }
+}

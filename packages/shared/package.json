@@ -5,6 +5,11 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@captech-dealflow/eslint-config": "workspace:*",
+    "eslint": "^9.18.0"
   }
 }

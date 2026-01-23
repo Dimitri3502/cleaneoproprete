@@ -1,33 +1,33 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-import type { DealSector, DealStage } from "@/lib/types";
+import { useRouter } from 'next/navigation';
+import { useState, type FormEvent } from 'react';
+import type { DealSector, DealStage } from '@/lib/types';
 import {
   useSectorOptions,
   useStageOptions,
   useCreateDealMutation,
-} from "@/services/deal/deal.hooks";
+} from '@/services/deal/deal.hooks';
 
 export default function UploadPage() {
   const router = useRouter();
-  const [companyName, setCompanyName] = useState("");
-  const [sector, setSector] = useState<DealSector>("unknown");
-  const [stage, setStage] = useState<DealStage>("unknown");
+  const [companyName, setCompanyName] = useState('');
+  const [sector, setSector] = useState<DealSector>('unknown');
+  const [stage, setStage] = useState<DealStage>('unknown');
 
   const { data: sectorOptions = [] } = useSectorOptions();
   const { data: stageOptions = [] } = useStageOptions();
   const createDealMutation = useCreateDealMutation();
 
-  const [sourceChannel, setSourceChannel] = useState("");
-  const [leadEmail, setLeadEmail] = useState("");
+  const [sourceChannel, setSourceChannel] = useState('');
+  const [leadEmail, setLeadEmail] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [localErrorMessage, setLocalErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!file) {
-      setLocalErrorMessage("Please select a PDF deck to upload.");
+      setLocalErrorMessage('Please select a PDF deck to upload.');
       return;
     }
 
@@ -53,20 +53,14 @@ export default function UploadPage() {
   const submitting = createDealMutation.isPending;
   const errorMessage =
     localErrorMessage ||
-    (createDealMutation.error instanceof Error
-      ? createDealMutation.error.message
-      : null);
+    (createDealMutation.error instanceof Error ? createDealMutation.error.message : null);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_0.8fr]">
       <div className="space-y-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Upload
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-            Upload a pitch deck
-          </h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Upload</p>
+          <h1 className="mt-2 text-3xl font-semibold text-slate-900">Upload a pitch deck</h1>
           <p className="mt-2 text-sm text-slate-600">
             Create a new deal record and attach the deck PDF for review.
           </p>
@@ -109,9 +103,7 @@ export default function UploadPage() {
               </span>
               <select
                 value={sector}
-                onChange={(event) =>
-                  setSector(event.target.value as DealSector)
-                }
+                onChange={(event) => setSector(event.target.value as DealSector)}
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
               >
                 {sectorOptions.length > 0 ? (
@@ -133,9 +125,7 @@ export default function UploadPage() {
               </span>
               <select
                 value={stage}
-                onChange={(event) =>
-                  setStage(event.target.value as DealStage)
-                }
+                onChange={(event) => setStage(event.target.value as DealStage)}
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
               >
                 {stageOptions.length > 0 ? (
@@ -189,26 +179,17 @@ export default function UploadPage() {
             disabled={submitting}
             className="w-full rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            {submitting ? "Uploading..." : "Create deal and upload"}
+            {submitting ? 'Uploading...' : 'Create deal and upload'}
           </button>
         </form>
       </div>
 
       <aside className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">
-          What happens next
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-900">What happens next</h2>
         <ul className="space-y-3">
-          <li>
-            A new deal record is created with basic metadata for immediate
-            tracking.
-          </li>
-          <li>
-            The deck is stored in Supabase Storage for downstream AI extraction.
-          </li>
-          <li>
-            Documents appear in the deal detail view for quick review.
-          </li>
+          <li>A new deal record is created with basic metadata for immediate tracking.</li>
+          <li>The deck is stored in Supabase Storage for downstream AI extraction.</li>
+          <li>Documents appear in the deal detail view for quick review.</li>
         </ul>
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
           Demo note: authentication and RLS are open for pilot purposes only.

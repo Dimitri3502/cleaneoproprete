@@ -3,16 +3,18 @@
 This is a monorepo containing the following applications:
 
 - `apps/nextjs-front`: The Next.js frontend application.
-- `apps/supabase-back`: The Supabase backend configuration and edge functions.
+- `supabase`: The Supabase backend configuration and edge functions.
 
 ## Getting Started
 
 1. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 2. Run development servers:
+
    ```bash
    pnpm dev
    ```

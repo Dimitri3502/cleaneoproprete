@@ -1,38 +1,30 @@
-"use client";
+'use client';
 
-import {useParams} from "next/navigation";
-import Link from "next/link";
-import type {EvidenceItem} from "@/lib/types";
-import {DecisionBadge} from "@/components/Badge";
-import {formatDate} from "@/lib/format";
-import {useAnalyzeDealMutation, useDeal, useDealDocuments,} from "@/services/deal/deal.hooks";
+import Link from 'next/link';
+import type { EvidenceItem } from '@/lib/types';
+import { DecisionBadge } from '@/components/Badge';
+import { formatDate } from '@/lib/format';
+import { useAnalyzeDealMutation, useDeal, useDealDocuments } from '@/services/deal/deal.hooks';
 
 const formatEnum = (value?: string | null) =>
-  value
-    ? value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-    : "—";
+  value ? value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '—';
 
 const formatScore = (value?: number | string | null) => {
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return '—';
   const numeric = Number(value);
-  return Number.isNaN(numeric) ? "—" : Math.round(numeric);
+  return Number.isNaN(numeric) ? '—' : Math.round(numeric);
 };
 
 const formatFileSize = (bytes?: number | null) => {
-  if (!bytes) return "—";
+  if (!bytes) return '—';
   const mb = bytes / 1024 / 1024;
   return `${mb.toFixed(2)} MB`;
 };
 
-export default function DealDetailClient() {
-  const params = useParams<{ id: string }>();
-  const dealId = params?.id;
+export default function DealDetailClient({ id }: { id?: string }) {
+  const dealId = id;
 
-  const {
-    data: deal,
-    isLoading: isDealLoading,
-    error: dealError,
-  } = useDeal(dealId);
+  const { data: deal, isLoading: isDealLoading, error: dealError } = useDeal(dealId);
 
   const {
     data: documents = [],
@@ -48,9 +40,7 @@ export default function DealDetailClient() {
   const errorMessage =
     (dealError instanceof Error ? dealError.message : null) ||
     (docsError instanceof Error ? docsError.message : null) ||
-    (analyzeDealMutation.error instanceof Error
-      ? analyzeDealMutation.error.message
-      : null);
+    (analyzeDealMutation.error instanceof Error ? analyzeDealMutation.error.message : null);
 
   const handleRefresh = async () => {
     if (!dealId) return;
@@ -70,11 +60,10 @@ export default function DealDetailClient() {
             Deal detail
           </p>
           <h1 className="mt-2 font-heading text-3xl font-semibold text-foreground">
-            {deal?.company_name || "Deal overview"}
+            {deal?.company_name || 'Deal overview'}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {deal?.deal_id || "No deal ID"} · {formatEnum(deal?.sector)} ·{" "}
-            {formatEnum(deal?.stage)}
+            {deal?.deal_id || 'No deal ID'} · {formatEnum(deal?.sector)} · {formatEnum(deal?.stage)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -85,11 +74,15 @@ export default function DealDetailClient() {
             disabled={isAnalyzing}
             className="rounded-[10px] border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground/80 transition hover:border-primary/40 hover:text-foreground disabled:opacity-50"
           >
-            {isAnalyzing ? "Analyzing..." : "Refresh"}
+            {isAnalyzing ? 'Analyzing...' : 'Refresh'}
           </button>
           <Link
             href="/deals"
             className="rounded-[10px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+            onClick={(_e) => {
+              // Ensure we actually navigate back to the list by clearing the search param
+              // Next.js Link handles this, but being explicit doesn't hurt if we are in the same page
+            }}
           >
             Back to deals
           </Link>
@@ -111,8 +104,7 @@ export default function DealDetailClient() {
                 {formatScore(deal.total_score)}
               </p>
               <p className="text-xs text-muted-foreground">
-                Overall confidence{" "}
-                {Math.round(Number(deal.overall_confidence ?? 0) * 100)}%
+                Overall confidence {Math.round(Number(deal.overall_confidence ?? 0) * 100)}%
               </p>
             </div>
             <div className="rounded-[14px] border border-border bg-card p-5 shadow-card">
@@ -120,11 +112,9 @@ export default function DealDetailClient() {
                 Next step
               </p>
               <p className="mt-2 font-heading text-lg font-semibold text-foreground">
-                {deal.next_step || "TBD"}
+                {deal.next_step || 'TBD'}
               </p>
-              <p className="text-xs text-muted-foreground">
-                Owner: {deal.owner || "Unassigned"}
-              </p>
+              <p className="text-xs text-muted-foreground">Owner: {deal.owner || 'Unassigned'}</p>
             </div>
             <div className="rounded-[14px] border border-border bg-card p-5 shadow-card">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -142,11 +132,9 @@ export default function DealDetailClient() {
           <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-6">
               <div className="rounded-[14px] border border-border bg-card p-5 shadow-card">
-                <h2 className="font-heading text-lg font-semibold text-foreground">
-                  Summary
-                </h2>
+                <h2 className="font-heading text-lg font-semibold text-foreground">Summary</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {deal.one_liner || "No one-liner captured yet."}
+                  {deal.one_liner || 'No one-liner captured yet.'}
                 </p>
                 {summaryBullets.length > 0 ? (
                   <ul className="mt-4 space-y-2 text-sm text-foreground/80">
@@ -165,15 +153,13 @@ export default function DealDetailClient() {
               </div>
 
               <div className="rounded-[14px] border border-border bg-card p-5 shadow-card">
-                <h2 className="font-heading text-lg font-semibold text-foreground">
-                  Scoring
-                </h2>
+                <h2 className="font-heading text-lg font-semibold text-foreground">Scoring</h2>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   {[
-                    ["Thesis fit", deal.thesis_fit_subscore],
-                    ["Stage + ticket", deal.stage_ticket_subscore],
-                    ["Team", deal.team_subscore],
-                    ["Data signal", deal.data_signal_subscore],
+                    ['Thesis fit', deal.thesis_fit_subscore],
+                    ['Stage + ticket', deal.stage_ticket_subscore],
+                    ['Team', deal.team_subscore],
+                    ['Data signal', deal.data_signal_subscore],
                   ].map(([label, score]) => (
                     <div
                       key={label}
@@ -191,9 +177,7 @@ export default function DealDetailClient() {
               </div>
 
               <div className="rounded-[14px] border border-border bg-card p-5 shadow-card">
-                <h2 className="font-heading text-lg font-semibold text-foreground">
-                  Evidence
-                </h2>
+                <h2 className="font-heading text-lg font-semibold text-foreground">Evidence</h2>
                 {evidenceItems.length ? (
                   <div className="mt-4 space-y-4">
                     {evidenceItems.map((item, index) => (
@@ -204,11 +188,9 @@ export default function DealDetailClient() {
                         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                           {item.field}
                         </p>
-                        <p className="mt-2 text-sm text-foreground/80">
-                          “{item.quote}”
-                        </p>
+                        <p className="mt-2 text-sm text-foreground/80">“{item.quote}”</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {item.location_hint || "Deck reference pending"}
+                          {item.location_hint || 'Deck reference pending'}
                         </p>
                       </div>
                     ))}
@@ -223,9 +205,7 @@ export default function DealDetailClient() {
 
             <div className="space-y-6">
               <div className="rounded-[14px] border border-border bg-card p-5 shadow-card">
-                <h2 className="font-heading text-lg font-semibold text-foreground">
-                  Risks & gaps
-                </h2>
+                <h2 className="font-heading text-lg font-semibold text-foreground">Risks & gaps</h2>
                 <div className="mt-4 space-y-4 text-sm text-foreground/80">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -238,9 +218,7 @@ export default function DealDetailClient() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        No red flags logged.
-                      </p>
+                      <p className="mt-2 text-xs text-muted-foreground">No red flags logged.</p>
                     )}
                   </div>
                   <div>
@@ -263,9 +241,7 @@ export default function DealDetailClient() {
               </div>
 
               <div className="rounded-[14px] border border-border bg-card p-5 shadow-card">
-                <h2 className="font-heading text-lg font-semibold text-foreground">
-                  Documents
-                </h2>
+                <h2 className="font-heading text-lg font-semibold text-foreground">Documents</h2>
                 {documents.length ? (
                   <div className="mt-4 space-y-3 text-sm text-foreground/80">
                     {documents.map((doc) => (
@@ -275,11 +251,10 @@ export default function DealDetailClient() {
                       >
                         <div>
                           <p className="font-semibold text-foreground">
-                            {doc.file_name || "Deck.pdf"}
+                            {doc.file_name || 'Deck.pdf'}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {formatFileSize(doc.file_size_bytes)} ·{" "}
-                            {formatDate(doc.created_at)}
+                            {formatFileSize(doc.file_size_bytes)} · {formatDate(doc.created_at)}
                           </p>
                         </div>
                         {doc.signedUrl ? (
@@ -296,9 +271,7 @@ export default function DealDetailClient() {
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    No documents uploaded yet.
-                  </p>
+                  <p className="mt-3 text-sm text-muted-foreground">No documents uploaded yet.</p>
                 )}
               </div>
             </div>
