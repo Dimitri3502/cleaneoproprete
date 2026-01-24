@@ -1,16 +1,31 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import type { DealSector, DealStage } from '@/lib/types';
 import {
   useSectorOptions,
   useStageOptions,
   useCreateDealMutation,
 } from '@/services/deal/deal.hooks';
+import { createClient } from '@/lib/supabase/client';
 
 export default function UploadPage() {
   const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/auth/login');
+      }
+    };
+    checkUser();
+  }, [router, supabase.auth]);
+
   const [companyName, setCompanyName] = useState('');
   const [sector, setSector] = useState<DealSector>('unknown');
   const [stage, setStage] = useState<DealStage>('unknown');

@@ -7,8 +7,10 @@ import { DecisionBadge } from '@/components/Badge';
 import { formatDate } from '@/lib/format';
 import { labelFromValue } from '@/lib/enums';
 import { useDeals, useDecisionOptions, useStatusOptions } from '@/services/deal/deal.hooks';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import DealDetailClient from './DealDetailClient';
+import { createClient } from '@/lib/supabase/client';
+import { useEffect } from 'react';
 
 type DealDecisionFilter = DealDecision | 'all';
 type DealStatusFilter = DealStatus | 'all';
@@ -30,6 +32,21 @@ export default function DealsPage() {
 }
 
 function DealsPageContent() {
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/auth/login');
+      }
+    };
+    checkUser();
+  }, [router, supabase.auth]);
+
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
 

@@ -13,7 +13,7 @@ function ConfirmContent() {
   useEffect(() => {
     const token_hash = searchParams.get('token_hash');
     const type = searchParams.get('type') as EmailOtpType | null;
-    const next = searchParams.get('next') ?? '/';
+    const next = searchParams.get('next') ?? '/deals';
 
     if (token_hash && type) {
       supabase.auth

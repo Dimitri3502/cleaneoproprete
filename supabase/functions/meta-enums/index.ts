@@ -1,11 +1,11 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { corsHeaders, getCorsHeaders } from '../_shared/cors.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const getExtendedCorsHeaders = (req: Request) => ({
+  ...getCorsHeaders(req),
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Cache-Control': 'public, max-age=300',
-};
+});
 
 // Configuration: which table columns to check for enums
 const CONFIG = [
@@ -23,7 +23,7 @@ const FALLBACKS: Record<string, string[]> = {
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: getExtendedCorsHeaders(req) });
   }
 
   try {
@@ -57,12 +57,12 @@ Deno.serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ enums: result }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...getExtendedCorsHeaders(req), 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...getExtendedCorsHeaders(req), 'Content-Type': 'application/json' },
       status: 500,
     });
   }

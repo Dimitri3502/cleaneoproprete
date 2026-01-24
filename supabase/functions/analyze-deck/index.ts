@@ -2,28 +2,35 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import OpenAI from 'npm:openai@^6.10.0';
 
+import { corsHeaders, getCorsHeaders } from '../_shared/cors.ts';
+
 type Payload = {
   deal_id: string;
   storage_bucket?: string;
   storage_path: string;
 };
 
-function json(data: unknown, status = 200) {
+
+function json(data: unknown, req: Request, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
   });
 }
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: getCorsHeaders(req) });
+  }
+
   try {
     if (req.method !== 'POST') {
-      return json({ error: 'POST required' }, 405);
+      return json({ error: 'POST required' }, req, 405);
     }
 
     const body = (await req.json()) as Payload;
     if (!body.deal_id || !body.storage_path) {
-      return json({ error: 'Missing deal_id or storage_path' }, 400);
+      return json({ error: 'Missing deal_id or storage_path' }, req, 400);
     }
 
     /* ------------------------------
@@ -42,7 +49,7 @@ Deno.serve(async (req) => {
     const { data: file, error } = await supabase.storage.from(bucket).download(body.storage_path);
 
     if (error || !file) {
-      return json({ error: 'Failed to download PDF', details: error?.message }, 500);
+      return json({ error: 'Failed to download PDF', details: error?.message }, req, 500);
     }
 
     /* ------------------------------
