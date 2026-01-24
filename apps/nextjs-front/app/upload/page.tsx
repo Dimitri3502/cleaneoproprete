@@ -1,25 +1,25 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent, useEffect } from 'react';
+import { type FormEvent, useState } from 'react';
 import type { DealSector, DealStage } from '@/lib/types';
 import {
+  useCreateDealMutation,
   useSectorOptions,
   useStageOptions,
-  useCreateDealMutation,
 } from '@/services/deal/deal.hooks';
-import { useUser } from '@/services/auth/auth.hooks';
+import { RequireAuth } from '@/components/auth/require-auth';
 
 export default function UploadPage() {
+  return (
+    <RequireAuth>
+      <UploadPageContent />
+    </RequireAuth>
+  );
+}
+
+function UploadPageContent() {
   const router = useRouter();
-  const { data: user, isLoading: loadingUser } = useUser();
-
-  useEffect(() => {
-    if (!loadingUser && !user) {
-      router.push(`/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-    }
-  }, [user, loadingUser, router]);
-
   const [companyName, setCompanyName] = useState('');
   const [sector, setSector] = useState<DealSector>('unknown');
   const [stage, setStage] = useState<DealStage>('unknown');
@@ -63,10 +63,6 @@ export default function UploadPage() {
   const errorMessage =
     localErrorMessage ||
     (createDealMutation.error instanceof Error ? createDealMutation.error.message : null);
-
-  if (loadingUser || !user) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_0.8fr]">

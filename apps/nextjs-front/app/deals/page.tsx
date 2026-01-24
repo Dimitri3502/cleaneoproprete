@@ -7,10 +7,9 @@ import { DecisionBadge } from '@/components/Badge';
 import { formatDate } from '@/lib/format';
 import { labelFromValue } from '@/lib/enums';
 import { useDeals, useDecisionOptions, useStatusOptions } from '@/services/deal/deal.hooks';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import DealDetailClient from './DealDetailClient';
-import { useEffect } from 'react';
-import { useUser } from '@/services/auth/auth.hooks';
+import { RequireAuth } from '@/components/auth/require-auth';
 
 type DealDecisionFilter = DealDecision | 'all';
 type DealStatusFilter = DealStatus | 'all';
@@ -25,22 +24,15 @@ const formatScore = (value?: number | string | null) => {
 
 export default function DealsPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <DealsPageContent />
-    </Suspense>
+    <RequireAuth>
+      <Suspense fallback={<div>Loading...</div>}>
+        <DealsPageContent />
+      </Suspense>
+    </RequireAuth>
   );
 }
 
 function DealsPageContent() {
-  const router = useRouter();
-  const { data: user, isLoading: loadingUser } = useUser();
-
-  useEffect(() => {
-    if (!loadingUser && !user) {
-      router.push(`/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-    }
-  }, [user, loadingUser, router]);
-
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
 
@@ -56,10 +48,6 @@ function DealsPageContent() {
     isLoading: loading,
     error: dealsError,
   } = useDeals(decisionFilter, statusFilter);
-
-  if (loadingUser || !user) {
-    return <div>Loading...</div>;
-  }
 
   if (id) {
     return <DealDetailClient id={id} />;

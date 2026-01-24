@@ -2,7 +2,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import OpenAI from 'npm:openai@^6.10.0';
 
-import { corsHeaders, getCorsHeaders } from '../_shared/cors.ts';
+import { corsHeaders } from '../_shared/cors.ts';
 
 type Payload = {
   deal_id: string;
@@ -14,13 +14,13 @@ type Payload = {
 function json(data: unknown, req: Request, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: getCorsHeaders(req) });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
