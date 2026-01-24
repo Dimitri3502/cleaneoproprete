@@ -5,7 +5,7 @@
     "dev": "turbo dev",
     "build": "NODE_ENV=production turbo build",
     "lint": "turbo lint",
-    "deploy": "pnpm build && pnpm --filter @captech-dealflow/pulumi deploy",
+    "deploy": "./deploy.sh",
     "format": "prettier --write .",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
