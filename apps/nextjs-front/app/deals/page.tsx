@@ -5,8 +5,8 @@ import { Suspense, useState } from 'react';
 import type { DealDecision, DealStatus } from '@/lib/types';
 import { DecisionBadge } from '@/components/Badge';
 import { formatDate } from '@/lib/format';
-import { labelFromValue } from '@/lib/enums';
-import { useDeals, useDecisionOptions, useStatusOptions } from '@/services/deal/deal.hooks';
+import { labelFromValue, useMetaEnums } from '@/lib/enums';
+import { useDeals } from '@/services/deal/deal.hooks';
 import { useSearchParams } from 'next/navigation';
 import DealDetailClient from './DealDetailClient';
 import { RequireAuth } from '@/components/auth/require-auth';
@@ -39,9 +39,9 @@ function DealsPageContent() {
   const [decisionFilter, setDecisionFilter] = useState<DealDecisionFilter>('all');
   const [statusFilter, setStatusFilter] = useState<DealStatusFilter>('all');
 
-  const { data: decisionOptions = [] } = useDecisionOptions();
-
-  const { data: statusOptions = [] } = useStatusOptions();
+  const { getOptions } = useMetaEnums();
+  const decisionOptions = getOptions('deals.go_no_go', true);
+  const statusOptions = getOptions('deals.status', true);
 
   const {
     data: deals = [],

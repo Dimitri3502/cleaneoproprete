@@ -3,11 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { type FormEvent, useState } from 'react';
 import type { DealSector, DealStage } from '@/lib/types';
-import {
-  useCreateDealMutation,
-  useSectorOptions,
-  useStageOptions,
-} from '@/services/deal/deal.hooks';
+import { useCreateDealMutation } from '@/services/deal/deal.hooks';
+import { useMetaEnums } from '@/lib/enums';
 import { RequireAuth } from '@/components/auth/require-auth';
 
 export default function UploadPage() {
@@ -24,8 +21,9 @@ function UploadPageContent() {
   const [sector, setSector] = useState<DealSector>('unknown');
   const [stage, setStage] = useState<DealStage>('unknown');
 
-  const { data: sectorOptions = [] } = useSectorOptions();
-  const { data: stageOptions = [] } = useStageOptions();
+  const { getOptions } = useMetaEnums();
+  const sectorOptions = getOptions('deals.sector');
+  const stageOptions = getOptions('deals.stage');
   const createDealMutation = useCreateDealMutation();
 
   const [sourceChannel, setSourceChannel] = useState('');

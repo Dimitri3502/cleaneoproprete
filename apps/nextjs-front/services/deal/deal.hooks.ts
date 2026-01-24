@@ -1,62 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
-import { fetchMetaEnums, labelFromValue, type EnumKey } from '@/lib/enums';
 import type { Deal, DealDocument, DealSector, DealStage } from '@/lib/types';
-
-async function getOptions(key: EnumKey): Promise<{ value: string; label: string }[]> {
-  const meta = await fetchMetaEnums();
-  const values = meta.enums[key] || [];
-  return values.map((v) => ({
-    value: v,
-    label: labelFromValue(v),
-  }));
-}
-
-/**
- * Hook to fetch sector options for deals.
- */
-export function useSectorOptions() {
-  return useQuery({
-    queryKey: ['options', 'deals.sector'],
-    queryFn: () => getOptions('deals.sector'),
-  });
-}
-
-/**
- * Hook to fetch stage options for deals.
- */
-export function useStageOptions() {
-  return useQuery({
-    queryKey: ['options', 'deals.stage'],
-    queryFn: () => getOptions('deals.stage'),
-  });
-}
-
-/**
- * Hook to fetch decision options for deals, including an "All" option.
- */
-export function useDecisionOptions() {
-  return useQuery({
-    queryKey: ['options', 'deals.go_no_go'],
-    queryFn: async () => {
-      const dOptions = await getOptions('deals.go_no_go');
-      return [{ value: 'all', label: 'All' }, ...dOptions];
-    },
-  });
-}
-
-/**
- * Hook to fetch status options for deals, including an "All" option.
- */
-export function useStatusOptions() {
-  return useQuery({
-    queryKey: ['options', 'deals.status'],
-    queryFn: async () => {
-      const sOptions = await getOptions('deals.status');
-      return [{ value: 'all', label: 'All' }, ...sOptions];
-    },
-  });
-}
 
 /**
  * Hook to fetch a list of deals with optional filtering.

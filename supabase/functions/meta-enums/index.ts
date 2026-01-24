@@ -1,11 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js';
-import { corsHeaders } from '../_shared/cors.ts';
-
-const extendedCorsHeaders = {
-  ...corsHeaders,
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Cache-Control': 'public, max-age=300',
-};
+import { corsHeadersForPOST } from '../_shared/cors.ts';
 
 const CONFIG = [
   { table: 'deals', column: 'sector' },
@@ -16,7 +10,7 @@ const CONFIG = [
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: extendedCorsHeaders });
+    return new Response('ok', { headers: corsHeadersForPOST });
   }
 
   const supabase = createClient(
@@ -38,7 +32,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(JSON.stringify({ enums: result }), {
-    headers: { ...extendedCorsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...corsHeadersForPOST, 'Content-Type': 'application/json' },
     status: 200,
   });
 });

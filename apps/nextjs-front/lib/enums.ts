@@ -22,11 +22,30 @@ export async function fetchMetaEnums(): Promise<MetaEnums> {
 }
 
 export function useMetaEnums() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['meta-enums'],
     queryFn: fetchMetaEnums,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  const getOptions = (key: EnumKey, includeAll = false) => {
+    if (!query.data) return [];
+    const values = query.data.enums[key] || [];
+    const options = values.map((v) => ({
+      value: v,
+      label: labelFromValue(v),
+    }));
+
+    if (includeAll) {
+      return [{ value: 'all', label: 'All' }, ...options];
+    }
+    return options;
+  };
+
+  return {
+    ...query,
+    getOptions,
+  };
 }
 
 export function labelFromValue(value: string): string {
