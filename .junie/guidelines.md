@@ -20,3 +20,8 @@
     - Use **React Query (`useQuery`, `useMutation`)** for all data fetching and external state management.
     - Do not use manual `useState` + `useEffect` for fetching data from Supabase or Edge Functions.
     - Leverage hooks in `services/` for consistent API access.
+
+5. **Authentication**
+    - Use **Magic Links (`signInWithOtp`)** as the primary authentication method.
+    - Leverage `onAuthStateChange` to monitor and respond to session changes across the app.
+    - Ensure all auth flows are client-side compatible for static hosting.

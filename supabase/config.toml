@@ -1,4 +1,8 @@
 
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://captech.luphy.fr/**", "http://localhost:3000/**", "http://localhost:3000/**"]
+
 [functions.analyze-deck]
 enabled = true
 verify_jwt = true
@@ -20,3 +24,9 @@ entrypoint = "./functions/healthcheck/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/healthcheck/*.html" ]
+
+[functions.meta-enums]
+enabled = true
+verify_jwt = true
+import_map = "./functions/meta-enums/deno.json"
+entrypoint = "./functions/meta-enums/index.ts"

@@ -1,7 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
-import { getOptions } from '@/lib/enums';
+import { fetchMetaEnums, labelFromValue, type EnumKey } from '@/lib/enums';
 import type { Deal, DealDocument, DealSector, DealStage } from '@/lib/types';
+
+async function getOptions(key: EnumKey): Promise<{ value: string; label: string }[]> {
+  const meta = await fetchMetaEnums();
+  const values = meta.enums[key] || [];
+  return values.map((v) => ({
+    value: v,
+    label: labelFromValue(v),
+  }));
+}
 
 /**
  * Hook to fetch sector options for deals.

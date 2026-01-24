@@ -15,7 +15,7 @@ export default function Page() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Please click the link in the email to complete your registration and sign in.
+                  Please click the link in the email to sign in to your account.
                 </p>
                 <div className="text-center">
                   <Link href="/auth/login" className="text-sm underline underline-offset-4">

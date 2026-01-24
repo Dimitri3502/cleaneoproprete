@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, getAppUrl } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,8 +12,6 @@ import { useState } from 'react';
 
 export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [repeatPassword, setRepeatPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -24,18 +22,11 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
     setIsLoading(true);
     setError(null);
 
-    if (password !== repeatPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: `${getAppUrl()}/auth/callback/`,
         },
       });
       if (error) throw error;
@@ -52,7 +43,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <CardDescription>Enter your email to receive a magic link</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp}>
@@ -68,33 +59,9 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
-                <Input
-                  id="repeat-password"
-                  type="password"
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
-                />
-              </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Creating an account...' : 'Sign up'}
+                {isLoading ? 'Sending link...' : 'Send Magic Link'}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">

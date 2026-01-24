@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import versionInfo from '../version.json';
 
 export function Footer() {
@@ -13,38 +12,6 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               Finance-grade deal intake and review workspace.
             </p>
-          </div>
-
-          <div>
-            <div className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Platform</div>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link href="/deals" className="transition-colors hover:text-foreground">
-                  Deals
-                </Link>
-              </li>
-              <li>
-                <Link href="/upload" className="transition-colors hover:text-foreground">
-                  Upload
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <div className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Resources</div>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link href="/terms" className="transition-colors hover:text-foreground">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="transition-colors hover:text-foreground">
-                  Privacy Policy
-                </Link>
-              </li>
-            </ul>
           </div>
         </div>
 

@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { createClient } from './supabase/client';
 
 export type MetaEnums = {
@@ -8,37 +9,24 @@ export type MetaEnums = {
 
 export type EnumKey = 'deals.sector' | 'deals.stage' | 'deals.go_no_go' | 'deals.status';
 
-let cachedEnums: MetaEnums | null = null;
-let lastFetch = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-export async function getMetaEnums(): Promise<MetaEnums> {
-  const now = Date.now();
-  if (cachedEnums && now - lastFetch < CACHE_DURATION) {
-    return cachedEnums;
-  }
-
+export async function fetchMetaEnums(): Promise<MetaEnums> {
   const supabase = createClient();
   const { data, error } = await supabase.functions.invoke<MetaEnums>('meta-enums');
 
   if (error || !data) {
     console.error('Error fetching meta-enums:', error);
-    // Return empty or fallback if needed. For now, empty structure.
-    return cachedEnums || { enums: {} };
+    return { enums: {} };
   }
 
-  cachedEnums = data;
-  lastFetch = now;
   return data;
 }
 
-export async function getOptions(key: EnumKey): Promise<{ value: string; label: string }[]> {
-  const meta = await getMetaEnums();
-  const values = meta.enums[key] || [];
-  return values.map((v) => ({
-    value: v,
-    label: labelFromValue(v),
-  }));
+export function useMetaEnums() {
+  return useQuery({
+    queryKey: ['meta-enums'],
+    queryFn: fetchMetaEnums,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 }
 
 export function labelFromValue(value: string): string {

@@ -90,9 +90,9 @@ const addFolderContents = (siteDir: string, prefix?: string) => {
 addFolderContents(siteDir);
 
 // 4. Configure a custom subdomain with automatic Let's Encrypt certificate
-const plan = new scaleway.EdgeServicesPlan('plan', { name: 'starter' });
+const plan = new scaleway.edgeservices.Plan('plan', { name: 'starter' });
 
-const pipeline = new scaleway.EdgeServicesPipeline(
+const pipeline = new scaleway.edgeservices.Pipeline(
   'main',
   {
     name: 'pipeline',
@@ -101,7 +101,7 @@ const pipeline = new scaleway.EdgeServicesPipeline(
   { dependsOn: [plan] },
 );
 
-const backend = new scaleway.EdgeServicesBackendStage(
+const backend = new scaleway.edgeservices.BackendStage(
   'backend',
   {
     pipelineId: pipeline.id,
@@ -114,7 +114,7 @@ const backend = new scaleway.EdgeServicesBackendStage(
   { dependsOn: [pipeline, bucket] },
 );
 
-const tls = new scaleway.EdgeServicesTlsStage(
+const tls = new scaleway.edgeservices.TlsStage(
   'tls',
   {
     pipelineId: pipeline.id,
@@ -124,7 +124,7 @@ const tls = new scaleway.EdgeServicesTlsStage(
   { dependsOn: [backend] },
 );
 
-const dns = new scaleway.EdgeServicesDnsStage(
+const dns = new scaleway.edgeservices.DnsStage(
   'dns',
   {
     pipelineId: pipeline.id,
@@ -134,7 +134,7 @@ const dns = new scaleway.EdgeServicesDnsStage(
   { dependsOn: [tls, pipeline] },
 );
 
-const head = new scaleway.EdgeServicesHeadStage(
+const head = new scaleway.edgeservices.HeadStage(
   'head',
   {
     pipelineId: pipeline.id,
