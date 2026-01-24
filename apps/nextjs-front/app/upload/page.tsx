@@ -8,23 +8,17 @@ import {
   useStageOptions,
   useCreateDealMutation,
 } from '@/services/deal/deal.hooks';
-import { createClient } from '@/lib/supabase/client';
+import { useUser } from '@/services/auth/auth.hooks';
 
 export default function UploadPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const { data: user, isLoading: loadingUser } = useUser();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/auth/login');
-      }
-    };
-    checkUser();
-  }, [router, supabase.auth]);
+    if (!loadingUser && !user) {
+      router.push(`/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    }
+  }, [user, loadingUser, router]);
 
   const [companyName, setCompanyName] = useState('');
   const [sector, setSector] = useState<DealSector>('unknown');
@@ -69,6 +63,10 @@ export default function UploadPage() {
   const errorMessage =
     localErrorMessage ||
     (createDealMutation.error instanceof Error ? createDealMutation.error.message : null);
+
+  if (loadingUser || !user) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_0.8fr]">

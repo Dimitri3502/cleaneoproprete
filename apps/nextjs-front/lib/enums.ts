@@ -1,4 +1,4 @@
-import { supabaseClient } from './supabaseClient';
+import { createClient } from './supabase/client';
 
 export type MetaEnums = {
   enums: {
@@ -18,7 +18,7 @@ export async function getMetaEnums(): Promise<MetaEnums> {
     return cachedEnums;
   }
 
-  const supabase = supabaseClient();
+  const supabase = createClient();
   const { data, error } = await supabase.functions.invoke<MetaEnums>('meta-enums');
 
   if (error || !data) {

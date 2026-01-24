@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabaseClient } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
 import { getOptions } from '@/lib/enums';
 import type { Deal, DealDocument, DealSector, DealStage } from '@/lib/types';
 
@@ -56,7 +56,7 @@ export function useDeals(decisionFilter: string = 'all', statusFilter: string = 
   return useQuery({
     queryKey: ['deals', decisionFilter, statusFilter],
     queryFn: async () => {
-      const supabase = supabaseClient();
+      const supabase = createClient();
       let query = supabase.from('deals').select('*').order('created_at', { ascending: false });
 
       if (decisionFilter !== 'all') {
@@ -81,7 +81,7 @@ export function useDeal(dealId?: string) {
     queryKey: ['deal', dealId],
     queryFn: async () => {
       if (!dealId) return null;
-      const supabase = supabaseClient();
+      const supabase = createClient();
       const { data, error } = await supabase.from('deals').select('*').eq('id', dealId).single();
       if (error) throw error;
       return data as Deal;
@@ -98,7 +98,7 @@ export function useDealDocuments(dealId?: string) {
     queryKey: ['deal_documents', dealId],
     queryFn: async () => {
       if (!dealId) return [];
-      const supabase = supabaseClient();
+      const supabase = createClient();
       const { data: documentData, error: docError } = await supabase
         .from('deal_documents')
         .select('*')
@@ -156,7 +156,7 @@ export function useCreateDealMutation() {
       leadEmail,
       file,
     }: CreateDealParams) => {
-      const supabase = supabaseClient();
+      const supabase = createClient();
 
       // 1) Create Deal
       const { data: dealData, error: dealError } = await supabase
@@ -236,7 +236,7 @@ export function useAnalyzeDealMutation() {
 
   return useMutation({
     mutationFn: async (dealId: string) => {
-      const supabase = supabaseClient();
+      const supabase = createClient();
 
       // 1) Get the latest document for this deal
       const { data: latestDoc, error: docError } = await supabase

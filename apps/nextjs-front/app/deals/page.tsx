@@ -9,8 +9,8 @@ import { labelFromValue } from '@/lib/enums';
 import { useDeals, useDecisionOptions, useStatusOptions } from '@/services/deal/deal.hooks';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DealDetailClient from './DealDetailClient';
-import { createClient } from '@/lib/supabase/client';
 import { useEffect } from 'react';
+import { useUser } from '@/services/auth/auth.hooks';
 
 type DealDecisionFilter = DealDecision | 'all';
 type DealStatusFilter = DealStatus | 'all';
@@ -33,19 +33,13 @@ export default function DealsPage() {
 
 function DealsPageContent() {
   const router = useRouter();
-  const supabase = createClient();
+  const { data: user, isLoading: loadingUser } = useUser();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/auth/login');
-      }
-    };
-    checkUser();
-  }, [router, supabase.auth]);
+    if (!loadingUser && !user) {
+      router.push(`/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    }
+  }, [user, loadingUser, router]);
 
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
@@ -62,6 +56,10 @@ function DealsPageContent() {
     isLoading: loading,
     error: dealsError,
   } = useDeals(decisionFilter, statusFilter);
+
+  if (loadingUser || !user) {
+    return <div>Loading...</div>;
+  }
 
   if (id) {
     return <DealDetailClient id={id} />;

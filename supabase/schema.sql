@@ -130,49 +130,48 @@ for each row execute function public.set_updated_at();
 alter table public.deals enable row level security;
 alter table public.deal_documents enable row level security;
 
--- Demo-only open policies (replace with proper auth for production).
-drop policy if exists "demo deals all access" on public.deals;
-create policy "demo deals all access"
-on public.deals
-for all
-using (true)
-with check (true);
+-- Add policies for authenticated users
+-- Deals
+CREATE POLICY "deals_read_authenticated" ON public.deals
+FOR SELECT TO authenticated
+USING (true);
 
-drop policy if exists "demo deal_documents all access" on public.deal_documents;
-create policy "demo deal_documents all access"
-on public.deal_documents
-for all
-using (true)
-with check (true);
+CREATE POLICY "deals_write_authenticated" ON public.deals
+FOR INSERT TO authenticated
+WITH CHECK (true);
+
+CREATE POLICY "deals_update_authenticated" ON public.deals
+FOR UPDATE TO authenticated
+USING (true);
+
+CREATE POLICY "deals_delete_authenticated" ON public.deals
+FOR DELETE TO authenticated
+USING (true);
+
+-- Deal Documents
+CREATE POLICY "docs_read_authenticated" ON public.deal_documents
+FOR SELECT TO authenticated
+USING (true);
+
+CREATE POLICY "docs_write_authenticated" ON public.deal_documents
+FOR INSERT TO authenticated
+WITH CHECK (true);
+
+CREATE POLICY "docs_update_authenticated" ON public.deal_documents
+FOR UPDATE TO authenticated
+USING (true)
+WITH CHECK (true);
+
+CREATE POLICY "docs_delete_authenticated" ON public.deal_documents
+FOR DELETE TO authenticated
+USING (true);
 
 insert into storage.buckets (id, name, public)
-values ('deal-decks', 'deal-decks', true)
+values ('deal-decks', 'deal-decks', false)
 on conflict (id) do update set public = excluded.public;
 
-alter table storage.objects enable row level security;
-
--- Demo-only open Storage policies for deck uploads/reads.
+-- Demo-only open Storage policies removed.
 drop policy if exists "demo deal-decks read" on storage.objects;
-create policy "demo deal-decks read"
-on storage.objects
-for select
-using (bucket_id = 'deal-decks');
-
 drop policy if exists "demo deal-decks insert" on storage.objects;
-create policy "demo deal-decks insert"
-on storage.objects
-for insert
-with check (bucket_id = 'deal-decks');
-
 drop policy if exists "demo deal-decks update" on storage.objects;
-create policy "demo deal-decks update"
-on storage.objects
-for update
-using (bucket_id = 'deal-decks')
-with check (bucket_id = 'deal-decks');
-
 drop policy if exists "demo deal-decks delete" on storage.objects;
-create policy "demo deal-decks delete"
-on storage.objects
-for delete
-using (bucket_id = 'deal-decks');

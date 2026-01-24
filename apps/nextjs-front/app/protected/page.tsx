@@ -1,31 +1,19 @@
 'use client';
 
-import { createClient } from '@/lib/supabase/client';
+import { useUser } from '@/services/auth/auth.hooks';
 import { InfoIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User } from '@supabase/supabase-js';
 
 export default function ProtectedPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: user, isLoading: loading } = useUser();
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/auth/login');
-      } else {
-        setUser(user);
-        setLoading(false);
-      }
-    };
-    checkUser();
-  }, [router, supabase.auth]);
+    if (!loading && !user) {
+      router.push(`/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    }
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -34,6 +22,10 @@ export default function ProtectedPage() {
         <div className="h-40 bg-muted rounded-md" />
       </div>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
