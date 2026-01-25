@@ -1,5 +1,4 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import { corsHeaders } from '../_shared/cors.ts';
 import { AuthMiddleware } from '../_shared/jwt/default.ts';
 
 Deno.serve((req) =>
@@ -12,7 +11,6 @@ Deno.serve((req) =>
       }),
       {
         headers: {
-          ...corsHeaders,
           'Content-Type': 'application/json',
         },
       },

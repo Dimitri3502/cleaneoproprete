@@ -1,5 +1,4 @@
 import { createClient } from 'npm:@supabase/supabase-js';
-import { corsHeadersForPOST } from '../_shared/cors.ts';
 import { AuthMiddleware } from '../_shared/jwt/default.ts';
 
 const CONFIG = [
@@ -30,7 +29,7 @@ Deno.serve((req) =>
     }
 
     return new Response(JSON.stringify({ enums: result }), {
-      headers: { ...corsHeadersForPOST, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       status: 200,
     });
   }),

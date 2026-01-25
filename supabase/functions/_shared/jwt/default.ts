@@ -1,6 +1,7 @@
 // Default supabase JWT verification
 // Use this template to validate tokens issued by Supabase default auth
 import * as jose from 'jsr:@panva/jose@6';
+import { corsHeaders } from '../cors.ts';
 
 const SUPABASE_JWT_ISSUER =
   Deno.env.get('SB_JWT_ISSUER') ?? Deno.env.get('SUPABASE_URL') + '/auth/v1';
@@ -29,15 +30,24 @@ function verifySupabaseJWT(jwt: string) {
 
 // Validates authorization header
 export async function AuthMiddleware(req: Request, next: (req: Request) => Promise<Response>) {
-  if (req.method === 'OPTIONS') return await next(req);
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: {
+        ...corsHeaders,
+      },
+    });
+  }
   try {
     const token = getAuthToken(req);
     const isValidJWT = await verifySupabaseJWT(token);
-    if (isValidJWT) return await next(req);
+    if (isValidJWT) {
+      return await next(req);
+    }
     return Response.json(
       { msg: 'Invalid JWT' },
       {
         status: 401,
+        headers: { 'Access-Control-Allow-Origin': '*' },
       },
     );
   } catch (e) {
@@ -45,6 +55,7 @@ export async function AuthMiddleware(req: Request, next: (req: Request) => Promi
       { msg: e?.toString() },
       {
         status: 401,
+        headers: { 'Access-Control-Allow-Origin': '*' },
       },
     );
   }

@@ -2,7 +2,6 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import OpenAI from 'npm:openai@^6.10.0';
 
-import { corsHeadersForPOST } from '../_shared/cors.ts';
 import { AuthMiddleware } from '../_shared/jwt/default.ts';
 
 type Payload = {
@@ -14,7 +13,7 @@ type Payload = {
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...corsHeadersForPOST, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
