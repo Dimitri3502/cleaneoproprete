@@ -41,7 +41,14 @@ export async function AuthMiddleware(req: Request, next: (req: Request) => Promi
     const token = getAuthToken(req);
     const isValidJWT = await verifySupabaseJWT(token);
     if (isValidJWT) {
-      return await next(req);
+      const response = await next(req);
+      // Ensure CORS headers are present on successful responses
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        if (!response.headers.has(key)) {
+          response.headers.set(key, value);
+        }
+      });
+      return response;
     }
     return Response.json(
       { msg: 'Invalid JWT' },
