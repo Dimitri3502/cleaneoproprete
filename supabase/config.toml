@@ -5,7 +5,7 @@ additional_redirect_urls = ["https://captech.luphy.fr/**", "http://localhost:300
 
 [functions.analyze-deck]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/analyze-deck/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -16,7 +16,7 @@ entrypoint = "./functions/analyze-deck/index.ts"
 
 [functions.healthcheck]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/healthcheck/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -27,6 +27,6 @@ entrypoint = "./functions/healthcheck/index.ts"
 
 [functions.meta-enums]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/meta-enums/deno.json"
 entrypoint = "./functions/meta-enums/index.ts"
