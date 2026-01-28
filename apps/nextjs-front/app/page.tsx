@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Script from 'next/script';
 
 export default function Home() {
@@ -43,9 +44,19 @@ export default function Home() {
             <span className="rounded-full bg-muted px-3 py-1">Produits écoresponsables</span>
           </div>
         </div>
-        <div className="relative rounded-[28px] border border-border bg-white/80 p-6 shadow-card">
-          <div className="absolute inset-0 -z-10 rounded-[28px] bg-[linear-gradient(140deg,_rgba(16,185,129,0.15),_rgba(250,204,21,0.12))]" />
+        <div className="relative overflow-hidden rounded-[28px] border border-border bg-white/80 p-6 shadow-card">
+          <div className="absolute inset-0 -z-10 rounded-[28px] bg-[linear-gradient(140deg,_rgba(24,163,166,0.18),_rgba(246,183,74,0.14))]" />
           <div className="space-y-6">
+            <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-soft">
+              <Image
+                src="/cleaning-hero.svg"
+                alt="Illustration nettoyage professionnel"
+                width={800}
+                height={600}
+                className="h-48 w-full object-cover"
+                priority
+              />
+            </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 Notre promesse
@@ -116,6 +127,44 @@ export default function Home() {
             <div key={card.title} className="rounded-2xl border border-border bg-white p-6 shadow-soft">
               <h3 className="font-heading text-xl font-semibold text-foreground">{card.title}</h3>
               <p className="mt-3 text-sm text-muted-foreground">{card.detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-8">
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            En images
+          </p>
+          <h2 className="font-heading text-3xl font-semibold text-foreground">
+            Des espaces nets, lumineux et accueillants
+          </h2>
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            {
+              title: 'Bureaux impeccables',
+              src: '/office-clean.svg',
+            },
+            {
+              title: 'Vitrerie soignée',
+              src: '/glass-clean.svg',
+            },
+            {
+              title: 'Fin de chantier',
+              src: '/site-finish.svg',
+            },
+          ].map((item) => (
+            <div key={item.title} className="rounded-2xl border border-border bg-white p-4 shadow-soft">
+              <Image
+                src={item.src}
+                alt={item.title}
+                width={640}
+                height={480}
+                className="h-44 w-full rounded-xl object-cover"
+              />
+              <p className="mt-4 text-sm font-semibold text-foreground">{item.title}</p>
             </div>
           ))}
         </div>
