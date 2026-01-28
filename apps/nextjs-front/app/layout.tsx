@@ -1,23 +1,24 @@
 import type { Metadata } from 'next';
-import { Inter, Poppins } from 'next/font/google';
+import { Cormorant_Garamond, Manrope } from 'next/font/google';
 import { TopNav } from '@/components/TopNav';
 import { Footer } from '@/components/Footer';
-import Providers from '@/components/Providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Dealflow OS',
-  description: 'Finance-grade deal intake and review workspace.',
+  title: 'Cleaneo Propreté | Entreprise de nettoyage en Haute-Savoie',
+  description:
+    'Entreprise de nettoyage écoresponsable en Haute-Savoie. Bureaux, copropriétés, vitrerie et fin de chantier.',
 };
 
-const inter = Inter({
-  variable: '--font-inter',
+const manrope = Manrope({
+  variable: '--font-manrope',
   display: 'swap',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 });
 
-const poppins = Poppins({
-  variable: '--font-poppins',
+const cormorant = Cormorant_Garamond({
+  variable: '--font-cormorant',
   display: 'swap',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
@@ -29,17 +30,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body
-        className={`${inter.variable} ${poppins.variable} font-sans bg-background text-foreground`}
+        className={`${manrope.variable} ${cormorant.variable} font-sans bg-background text-foreground`}
       >
-        <Providers>
-          <div className="min-h-screen flex flex-col bg-[radial-gradient(circle_at_top,_rgba(75,46,131,0.16),_transparent_60%)]">
-            <TopNav />
-            <main className="flex-1 mx-auto w-full max-w-6xl px-6 py-10">{children}</main>
-            <Footer />
-          </div>
-        </Providers>
+        <div className="min-h-screen flex flex-col bg-[radial-gradient(circle_at_top,_rgba(11,91,106,0.18),_transparent_60%),_radial-gradient(circle_at_bottom,_rgba(24,163,166,0.16),_transparent_55%)]">
+          <TopNav />
+          <main className="flex-1 mx-auto w-full max-w-6xl px-6 py-12">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

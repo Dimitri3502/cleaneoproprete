@@ -12,8 +12,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-poppins)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-manrope)', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-cormorant)', 'var(--font-manrope)', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
